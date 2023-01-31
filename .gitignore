@@ -55,5 +55,5 @@ dkms.conf
 /API/appsettings.json
 
 # Remove bin and obj directoriers
-/API/bin
-/API/obj
+*/bin
+*/obj
