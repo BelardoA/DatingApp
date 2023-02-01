@@ -1,2 +1,2 @@
 # DatingApp
-C# DatingApp created while following a udemy course.
+C# DatingApp created while following a udemy course using bootstrap and angular.
