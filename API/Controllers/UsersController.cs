@@ -34,4 +34,10 @@ public class UsersController : BaseApiController
     {
         return await _userRepository.GetMemberAsync(userName);
     }
+
+    // [HttpPut]
+    // public async Task<ActionResult> UpdateUser(MemberUpdateDto memberUpdateDto)
+    // {
+    //     var userName = User.FindFirst(Claim)
+    // }
 }
