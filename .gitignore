@@ -52,7 +52,7 @@ Mkfile.old
 dkms.conf
 
 # Remove All appsettings
-/API/appsettings.json
+/API/*.json
 
 # Remove bin and obj directoriers
 */bin
