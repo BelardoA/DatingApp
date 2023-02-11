@@ -49,7 +49,9 @@ public class AccountController : BaseApiController
     [HttpPost("login")]
     public async Task<ActionResult<UserDto>> Login(LoginDto loginDto)
     {
-        var user = await _context.Users.SingleOrDefaultAsync(x => x.UserName == loginDto.UserName);
+        var user = await _context.Users
+            .Include(x=> x.Photos)
+            .SingleOrDefaultAsync(x => x.UserName == loginDto.UserName);
 
         if (user == null) return Unauthorized("Invalid username.");
         
@@ -65,7 +67,8 @@ public class AccountController : BaseApiController
         return new UserDto
         {
             UserName = user.UserName,
-            Token = _tokenService.CreateToken(user)
+            Token = _tokenService.CreateToken(user),
+            PhotoUrl = user.Photos.First(x => x.IsMain)?.Url
         };
     }
 
