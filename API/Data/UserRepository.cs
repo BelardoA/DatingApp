@@ -1,5 +1,6 @@
 using API.DTOs;
 using API.Entities;
+using API.Helpers;
 using API.Interfaces;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
@@ -17,7 +18,7 @@ public class UserRepository : IUserRepository
         _context = context;
         _mapper = mapper;
     }
-    
+
     public void Update(AppUser user)
     {
         _context.Entry(user).State = EntityState.Modified;
@@ -47,12 +48,13 @@ public class UserRepository : IUserRepository
             .SingleOrDefaultAsync(x => x.UserName == userName);
     }
 
-    public async Task<IEnumerable<MemberDto>> GetMembersAsync()
+    public async Task<PagedList<MemberDto>> GetMembersAsync(UserParams userParams)
     {
-        return await _context.Users
+        var query = _context.Users
             .ProjectTo<MemberDto>(_mapper.ConfigurationProvider)
-            .ToListAsync();
+            .AsNoTracking();
 
+        return await PagedList<MemberDto>.CreateAsync(query, userParams.PageNumber, userParams.PageSize);
     }
 
     public async Task<MemberDto> GetMemberAsync(string userName)
