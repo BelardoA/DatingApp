@@ -4,6 +4,7 @@ import {HttpClient, HttpParams} from "@angular/common/http";
 import {Member} from "../_models/member";
 import {map, of} from "rxjs";
 import {PaginatedResult} from "../_models/pagination";
+import {UserParams} from "../_modules/userParams";
 
 @Injectable({
   providedIn: 'root'
@@ -15,31 +16,29 @@ export class MembersService {
   constructor(private http: HttpClient) {
   }
 
-  paginatedResult: PaginatedResult<Member[]> = new PaginatedResult<Member[]>;
+  getMembers(userParams: UserParams) {
+    let params = this.getPaginationHeaders(userParams.pageNumber, userParams.pageSize);
 
-  getMembers(page?: number, itemsPerPage?: number) {
-    let params = new HttpParams();
+    params = params.append('minAge', userParams.minAge);
+    params = params.append('maxAge', userParams.maxAge);
+    params = params.append('gender', userParams.gender);
 
-    if (page && itemsPerPage) {
-      params = params.append('pageNumber', page);
-      params = params.append('pageSize', itemsPerPage);
-    }
-    // if (this.members.length > 0) return of(this.members);
-    return this.http.get<Member[]>(this.baseUrl + 'users', {observe: 'response', params}).pipe(
+    return this.getPaginatedResults<Member[]>(this.baseUrl + 'users', params);
+  }
+
+  private getPaginatedResults<T>(url: string, params: HttpParams) {
+    const paginatedResult: PaginatedResult<T> = new PaginatedResult<T>;
+    return this.http.get<T>(url, {observe: 'response', params}).pipe(
       map(response => {
         if (response.body) {
-          this.paginatedResult.result = response.body;
+          paginatedResult.result = response.body;
         }
         const pagination = response.headers.get('Pagination');
         if (pagination) {
-          this.paginatedResult.pagination = JSON.parse(pagination)
+          paginatedResult.pagination = JSON.parse(pagination)
         }
-        return this.paginatedResult;
+        return paginatedResult;
       })
-      // map(members => {
-      //   this.members = members;
-      //   return members;
-      // })
     )
   }
 
@@ -49,7 +48,7 @@ export class MembersService {
     return this.http.get<Member>(this.baseUrl + 'users/' + username)
   }
 
-  updateMember (member: Member){
+  updateMember(member: Member) {
     return this.http.put(this.baseUrl + "users", member).pipe(
       map(() => {
         const index = this.members.indexOf(member);
@@ -58,12 +57,20 @@ export class MembersService {
     );
   }
 
-  setMainPhoto (photoId: number) {
+  setMainPhoto(photoId: number) {
     return this.http.put(this.baseUrl + 'users/set-main-photo/' + photoId, {});
   }
 
-  deletePhoto (photoId: number) {
+  deletePhoto(photoId: number) {
     return this.http.delete(this.baseUrl + 'users/delete-photo/' + photoId);
+  }
+
+  private getPaginationHeaders(pageNumber: number, pageSize: number) {
+    let params = new HttpParams();
+    params = params.append('pageNumber', pageNumber);
+    params = params.append('pageSize', pageSize);
+
+    return params;
   }
 
 }
