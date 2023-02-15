@@ -10,7 +10,7 @@ public class MessageDto
     public string SenderPhotoUrl { get; set; }
 
     public int RecipientId { get; set; }
-    public string RecipientUsername { get; set; }
+    public string RecipientUserName { get; set; }
     public string RecipientPhotoUrl { get; set; }
 
     public string Content { get; set; }

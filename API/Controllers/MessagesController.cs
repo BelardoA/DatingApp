@@ -26,14 +26,14 @@ public class MessagesController : BaseApiController
     {
         var userName = User.GetUserName();
 
-        if (userName == createMessageDto.RecipientUsername.ToLower())
+        if (userName == createMessageDto.RecipientUserName.ToLower())
         {
             return BadRequest("You cannot send messages to yourself.");
         }
 
         var sender = await _userRepository.GetUserByUserNameAsync(userName);
 
-        var recipient = await _userRepository.GetUserByUserNameAsync(createMessageDto.RecipientUsername);
+        var recipient = await _userRepository.GetUserByUserNameAsync(createMessageDto.RecipientUserName);
 
         if (recipient == null) return NotFound();
 
@@ -42,7 +42,7 @@ public class MessagesController : BaseApiController
             Sender = sender,
             Recipient = recipient,
             SenderUserName = sender.UserName,
-            RecipientUsername = recipient.UserName,
+            RecipientUserName = recipient.UserName,
             Content = createMessageDto.Content
         };
 
@@ -67,5 +67,13 @@ public class MessagesController : BaseApiController
             messages.TotalPages));
 
         return messages;
+    }
+
+    [HttpGet("thread/{userName}")]
+    public async Task<ActionResult<IEnumerable<MessageDto>>> GetMessageThread(string username)
+    {
+        var currentUserName = User.GetUserName();
+
+        return Ok(await _messagesRepository.GetMessageThread(currentUserName, username));
     }
 }
