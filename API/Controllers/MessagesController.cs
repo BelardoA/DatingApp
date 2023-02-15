@@ -1,6 +1,7 @@
 using API.DTOs;
 using API.Entities;
 using API.Extensions;
+using API.Helpers;
 using API.Interfaces;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
@@ -25,14 +26,14 @@ public class MessagesController : BaseApiController
     {
         var userName = User.GetUserName();
 
-        if (userName == createMessageDto.RecipientUserName.ToLower())
+        if (userName == createMessageDto.RecipientUsername.ToLower())
         {
             return BadRequest("You cannot send messages to yourself.");
         }
 
         var sender = await _userRepository.GetUserByUserNameAsync(userName);
 
-        var recipient = await _userRepository.GetUserByUserNameAsync(createMessageDto.RecipientUserName);
+        var recipient = await _userRepository.GetUserByUserNameAsync(createMessageDto.RecipientUsername);
 
         if (recipient == null) return NotFound();
 
@@ -41,7 +42,7 @@ public class MessagesController : BaseApiController
             Sender = sender,
             Recipient = recipient,
             SenderUserName = sender.UserName,
-            RecipientUserName = sender.UserName,
+            RecipientUsername = recipient.UserName,
             Content = createMessageDto.Content
         };
 
@@ -50,5 +51,21 @@ public class MessagesController : BaseApiController
         if (await _messagesRepository.SaveAllAsync()) return Ok(_mapper.Map<MessageDto>(message));
 
         return BadRequest("Failed to send message.");
+    }
+
+    [HttpGet]
+    public async Task<ActionResult<PagedList<MessageDto>>> GetMessagesForUser([FromQuery] MessageParams messageParams)
+    {
+        messageParams.UserName = User.GetUserName();
+
+        var messages = await _messagesRepository.GetMessagesForUser(messageParams);
+
+        Response.AddPaginationHeader(new PaginationHeader(
+            messages.CurrentPage,
+            messages.PageSize,
+            messages.TotalCount,
+            messages.TotalPages));
+
+        return messages;
     }
 }
