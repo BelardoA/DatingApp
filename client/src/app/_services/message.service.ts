@@ -20,6 +20,6 @@ export class MessageService {
   }
 
   getMessageThread(userName: string) {
-    return this.http.get<Message[]>(this.baseUrl + '/messages/thread/' + userName);
+    return this.http.get<Message[]>(this.baseUrl + 'messages/thread/' + userName);
   }
 }
