@@ -27,6 +27,7 @@ import {TextInputComponent} from './_forms/text-input/text-input.component';
 import {DatePickerComponent} from './_forms/date-picker/date-picker.component';
 import {MemberMessagesComponent} from './members/member-messages/member-messages.component';
 import {AdminPanelComponent} from './admin/admin-panel/admin-panel.component';
+import {HasRolesDirective} from './_directives/has-roles.directive';
 
 @NgModule({
   declarations: [
@@ -47,7 +48,8 @@ import {AdminPanelComponent} from './admin/admin-panel/admin-panel.component';
     TextInputComponent,
     DatePickerComponent,
     MemberMessagesComponent,
-    AdminPanelComponent
+    AdminPanelComponent,
+    HasRolesDirective
   ],
   imports: [
     BrowserAnimationsModule,
