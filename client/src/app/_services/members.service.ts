@@ -4,7 +4,7 @@ import {HttpClient, HttpParams} from "@angular/common/http";
 import {Member} from "../_models/member";
 import {map, of, take} from "rxjs";
 import {UserParams} from "../_modules/userParams";
-import {AccountService} from "./acount.service";
+import {AccountService} from "./account.service";
 import {User} from "../_models/user";
 import {getPaginatedResults, getPaginationHeaders} from "./PaginationHelper";
 
