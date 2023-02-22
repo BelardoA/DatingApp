@@ -18,16 +18,18 @@ import { TestErrorComponent } from './errors/test-error/test-error.component';
 import {ErrorInterceptor} from "./_interceptors/error.interceptor";
 import { NotFoundComponent } from './errors/not-found/not-found.component';
 import { ServerErrorComponent } from './errors/server-error/server-error.component';
-import { MemberCardComponent } from './members/member-card/member-card.component';
+import {MemberCardComponent} from './members/member-card/member-card.component';
 import {JwtInterceptor} from "./_interceptors/jwt.interceptor";
-import { MemberEditComponent } from './members/member-edit/member-edit.component';
+import {MemberEditComponent} from './members/member-edit/member-edit.component';
 import {LoadingInterceptor} from "./_interceptors/loading.interceptor";
-import { PhotoEditorComponent } from './members/photo-editor/photo-editor.component';
+import {PhotoEditorComponent} from './members/photo-editor/photo-editor.component';
 import {TextInputComponent} from './_forms/text-input/text-input.component';
 import {DatePickerComponent} from './_forms/date-picker/date-picker.component';
 import {MemberMessagesComponent} from './members/member-messages/member-messages.component';
 import {AdminPanelComponent} from './admin/admin-panel/admin-panel.component';
 import {HasRolesDirective} from './_directives/has-roles.directive';
+import {UserManagementComponent} from './admin/user-management/user-management.component';
+import {PhotoManagementComponent} from './admin/photo-management/photo-management.component';
 
 @NgModule({
   declarations: [
@@ -49,7 +51,9 @@ import {HasRolesDirective} from './_directives/has-roles.directive';
     DatePickerComponent,
     MemberMessagesComponent,
     AdminPanelComponent,
-    HasRolesDirective
+    HasRolesDirective,
+    UserManagementComponent,
+    PhotoManagementComponent
   ],
   imports: [
     BrowserAnimationsModule,
