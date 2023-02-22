@@ -21,6 +21,7 @@ public static class ApplicationServiceExtensions
         services.AddScoped<LogUserActivity>();
         services.AddScoped<ILikesRepository, LikesRepository>();
         services.AddScoped<IMessagesRepository, MessageRepository>();
+        services.AddSignalR();
 
         return services;
     }
