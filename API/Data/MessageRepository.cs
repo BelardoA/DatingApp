@@ -55,17 +55,15 @@ public class MessageRepository : IMessagesRepository
 
     public async Task<IEnumerable<MessageDto>> GetMessageThread(string currentUserName, string recipientUserName)
     {
-        var messages = await _context.Messages
-            .Include(u => u.Sender).ThenInclude(p => p.Photos)
-            .Include(u => u.Recipient).ThenInclude(p => p.Photos)
+        var query = _context.Messages
             .Where(m => m.RecipientUserName == currentUserName && m.SenderUserName == recipientUserName &&
                         m.RecipientDeleted == false
                         || m.RecipientUserName == recipientUserName && m.SenderUserName == currentUserName &&
                         m.SenderDeleted == false)
             .OrderBy(m => m.MessageSent)
-            .ToListAsync();
+            .AsQueryable();
 
-        var unreadMessages = messages.Where(m => m.DateRead == null && m.RecipientUserName == currentUserName).ToList();
+        var unreadMessages = query.Where(m => m.DateRead == null && m.RecipientUserName == currentUserName).ToList();
 
         if (unreadMessages.Any())
         {
@@ -75,7 +73,7 @@ public class MessageRepository : IMessagesRepository
             }
         }
 
-        return _mapper.Map<IEnumerable<MessageDto>>(messages);
+        return await query.ProjectTo<MessageDto>(_mapper.ConfigurationProvider).ToListAsync();
     }
 
     public void AddGroup(Group group)
