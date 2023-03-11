@@ -10,14 +10,12 @@ namespace API.Controllers;
 
 public class MessagesController : BaseApiController
 {
-    private readonly IUserRepository _userRepository;
-    private readonly IMessagesRepository _messagesRepository;
+    private readonly IUnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
 
-    public MessagesController(IUserRepository userRepository, IMessagesRepository messagesRepository, IMapper mapper)
+    public MessagesController(IUnitOfWork unitOfWork, IMapper mapper)
     {
-        _userRepository = userRepository;
-        _messagesRepository = messagesRepository;
+        _unitOfWork = unitOfWork;
         _mapper = mapper;
     }
 
@@ -31,9 +29,9 @@ public class MessagesController : BaseApiController
             return BadRequest("You cannot send messages to yourself.");
         }
 
-        var sender = await _userRepository.GetUserByUserNameAsync(userName);
+        var sender = await _unitOfWork.UserRepository.GetUserByUserNameAsync(userName);
 
-        var recipient = await _userRepository.GetUserByUserNameAsync(createMessageDto.RecipientUserName);
+        var recipient = await _unitOfWork.UserRepository.GetUserByUserNameAsync(createMessageDto.RecipientUserName);
 
         if (recipient == null) return NotFound();
 
@@ -46,9 +44,9 @@ public class MessagesController : BaseApiController
             Content = createMessageDto.Content
         };
 
-        _messagesRepository.AddMessage(message);
+        _unitOfWork.MessagesRepository.AddMessage(message);
 
-        if (await _messagesRepository.SaveAllAsync()) return Ok(_mapper.Map<MessageDto>(message));
+        if (await _unitOfWork.Complete()) return Ok(_mapper.Map<MessageDto>(message));
 
         return BadRequest("Failed to send message.");
     }
@@ -58,7 +56,7 @@ public class MessagesController : BaseApiController
     {
         messageParams.UserName = User.GetUserName();
 
-        var messages = await _messagesRepository.GetMessagesForUser(messageParams);
+        var messages = await _unitOfWork.MessagesRepository.GetMessagesForUser(messageParams);
 
         Response.AddPaginationHeader(new PaginationHeader(
             messages.CurrentPage,
@@ -69,20 +67,12 @@ public class MessagesController : BaseApiController
         return messages;
     }
 
-    [HttpGet("thread/{userName}")]
-    public async Task<ActionResult<IEnumerable<MessageDto>>> GetMessageThread(string username)
-    {
-        var currentUserName = User.GetUserName();
-
-        return Ok(await _messagesRepository.GetMessageThread(currentUserName, username));
-    }
-
     [HttpDelete("{id}")]
     public async Task<ActionResult> DeleteMessage(int id)
     {
         var userName = User.GetUserName();
 
-        var message = await _messagesRepository.GetMessage(id);
+        var message = await _unitOfWork.MessagesRepository.GetMessage(id);
 
         if (userName != message.SenderUserName && userName != message.RecipientUserName) return Unauthorized();
 
@@ -91,10 +81,10 @@ public class MessagesController : BaseApiController
 
         if (message.SenderDeleted && message.RecipientDeleted)
         {
-            _messagesRepository.DeleteMessage(message);
+            _unitOfWork.MessagesRepository.DeleteMessage(message);
         }
 
-        if (await _messagesRepository.SaveAllAsync()) return Ok();
+        if (await _unitOfWork.Complete()) return Ok();
 
         return BadRequest("Problem deleting the message.");
     }
