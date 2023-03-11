@@ -55,7 +55,7 @@ public class PresenceTracker
         return Task.FromResult(onlineUsers);
     }
 
-    public static Task<List<string>> GetConnectionsForUser(string userName)
+    public Task<List<string>> GetConnectionsForUser(string userName)
     {
         List<string> connectionIds;
 
