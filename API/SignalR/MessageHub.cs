@@ -14,12 +14,15 @@ public class MessageHub : Hub
     private readonly IMessagesRepository _messagesRepository;
     private readonly IUserRepository _userRepository;
     private readonly IMapper _mapper;
+    private readonly IHubContext<PresenceHub> _presenceHub;
 
-    public MessageHub(IMessagesRepository messagesRepository, IUserRepository userRepository, IMapper mapper)
+    public MessageHub(IMessagesRepository messagesRepository, IUserRepository userRepository, IMapper mapper,
+        IHubContext<PresenceHub> presenceHub)
     {
         _messagesRepository = messagesRepository;
         _userRepository = userRepository;
         _mapper = mapper;
+        _presenceHub = presenceHub;
     }
 
     public override async Task OnConnectedAsync()
@@ -72,6 +75,15 @@ public class MessageHub : Hub
         if (group.Connections.Any(x => x.UserName == recipient.UserName))
         {
             message.DateRead = DateTime.UtcNow;
+        }
+        else
+        {
+            var connections = await PresenceTracker.GetConnectionsForUser(recipient.UserName);
+            if (connections != null)
+            {
+                await _presenceHub.Clients.Clients(connections).SendAsync("NewMessageReceived",
+                    new { userName = sender.UserName, knownAs = sender.KnownAs });
+            }
         }
 
         _messagesRepository.AddMessage(message);
