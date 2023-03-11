@@ -14,19 +14,21 @@ public class MessageHub : Hub
     private readonly IUnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
     private readonly IHubContext<PresenceHub> _presenceHub;
+    private readonly PresenceTracker _tracker;
 
     public MessageHub(IUnitOfWork unitOfWork, IMapper mapper,
-        IHubContext<PresenceHub> presenceHub)
+        IHubContext<PresenceHub> presenceHub, PresenceTracker tracker)
     {
         _unitOfWork = unitOfWork;
         _mapper = mapper;
         _presenceHub = presenceHub;
+        _tracker = tracker;
     }
 
     public override async Task OnConnectedAsync()
     {
         var httpContext = Context.GetHttpContext();
-        var otherUser = httpContext.Request.Query["user"];
+        var otherUser = httpContext.Request.Query["user"].ToString();
 
         var groupName = GetGroupName(Context.User.GetUserName(), otherUser);
         await Groups.AddToGroupAsync(Context.ConnectionId, groupName);
@@ -45,7 +47,7 @@ public class MessageHub : Hub
     public override async Task OnDisconnectedAsync(Exception exception)
     {
         var group = await RemoveFromMessageGroup();
-        await Clients.Group(group.Name).SendAsync("UpdatedGroup");
+        await Clients.Group(group.Name).SendAsync("UpdatedGroup", group);
         await base.OnDisconnectedAsync(exception);
     }
 
@@ -81,7 +83,7 @@ public class MessageHub : Hub
         }
         else
         {
-            var connections = await PresenceTracker.GetConnectionsForUser(recipient.UserName);
+            var connections = await _tracker.GetConnectionsForUser(recipient.UserName);
             if (connections != null)
             {
                 await _presenceHub.Clients.Clients(connections).SendAsync("NewMessageReceived",
