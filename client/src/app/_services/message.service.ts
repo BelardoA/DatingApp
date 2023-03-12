@@ -36,7 +36,6 @@ export class MessageService {
     })
 
     this.hubConnection.on("UpdatedGroup", (group: Group) => {
-      debugger;
       if (group.connections.some(x => x.userName === otherUserName)) {
         this.messageThread$.pipe(take(1)).subscribe({
           next: messages => {
