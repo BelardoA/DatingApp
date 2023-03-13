@@ -3,5 +3,10 @@
 }
 
 input[type=file] {
-  color:transparent;
+  color: transparent;
+}
+
+.img-not-approved {
+  opacity: 0.5;
+  border: #333333;
 }
