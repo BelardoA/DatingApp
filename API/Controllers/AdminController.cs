@@ -1,4 +1,7 @@
+using API.DTOs;
 using API.Entities;
+using API.Interfaces;
+using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -9,10 +12,14 @@ namespace API.Controllers;
 public class AdminController : BaseApiController
 {
     private readonly UserManager<AppUser> _userManager;
+    private readonly IPhotoService _photoService;
+    private readonly IMapper _mapper;
 
-    public AdminController(UserManager<AppUser> userManager)
+    public AdminController(UserManager<AppUser> userManager, IPhotoService photoService, IMapper mapper)
     {
         _userManager = userManager;
+        _photoService = photoService;
+        _mapper = mapper;
     }
 
     [Authorize(Policy = "RequireAdminRole")]
@@ -58,8 +65,19 @@ public class AdminController : BaseApiController
 
     [Authorize(Policy = "ModeratePhotoRole")]
     [HttpGet("photos-to-moderate")]
-    public ActionResult GetPhotosForModeration()
+    public ActionResult<IEnumerable<PhotoDto>> GetPhotosForModeration()
     {
-        return Ok("Admins or moderators can see this.");
+        var query = _photoService.GetUnapprovedPhotos();
+
+        if (query == null) return NotFound();
+
+        List<PhotoDto> photos = new List<PhotoDto>();
+        // add photos to list of PhotoDtos
+        foreach (Photo photo in query.Result)
+        {
+            photos.Add(_mapper.Map<PhotoDto>(photo));
+        }
+
+        return Ok(photos);
     }
 }
