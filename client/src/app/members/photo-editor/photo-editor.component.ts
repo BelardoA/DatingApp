@@ -69,7 +69,7 @@ export class PhotoEditorComponent implements OnInit {
   setMainPhoto(photo: Photo){
     this.memberService.setMainPhoto(photo.id).subscribe({
       next: () => {
-        if (this.user && this.member){
+        if (this.user && this.member && photo.isApproved) {
           this.user.photoUrl = photo.url;
           this.accountService.setCurrentUser(this.user);
           this.member.photoUrl = photo.url;
