@@ -14,12 +14,18 @@ public class AdminController : BaseApiController
     private readonly UserManager<AppUser> _userManager;
     private readonly IPhotoService _photoService;
     private readonly IMapper _mapper;
+    private readonly IUnitOfWork _unitOfWork;
 
-    public AdminController(UserManager<AppUser> userManager, IPhotoService photoService, IMapper mapper)
+    public AdminController(
+        UserManager<AppUser> userManager,
+        IPhotoService photoService,
+        IMapper mapper,
+        IUnitOfWork unitOfWork)
     {
         _userManager = userManager;
         _photoService = photoService;
         _mapper = mapper;
+        _unitOfWork = unitOfWork;
     }
 
     [Authorize(Policy = "RequireAdminRole")]
@@ -79,5 +85,22 @@ public class AdminController : BaseApiController
         }
 
         return Ok(photos);
+    }
+
+    [Authorize(Policy = "ModeratePhotoRole")]
+    [HttpPut("approve-photo/{photoId}")]
+    public async Task<ActionResult> ApprovePhoto(int photoId)
+    {
+        var photo = _photoService.GetPhotoById(photoId).Result;
+
+        if (photo == null) return NotFound();
+
+        if (photo.IsApproved) return BadRequest("This photo has already been approved.");
+
+        photo.IsApproved = true;
+
+        if (await _unitOfWork.Complete()) return NoContent();
+
+        return BadRequest("Problem setting main photo.");
     }
 }
