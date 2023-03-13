@@ -3,4 +3,6 @@ export interface Photo {
   url: string;
   isMain: boolean;
   isApproved: boolean;
+  userId: string,
+  userName: string
 }
