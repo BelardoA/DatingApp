@@ -54,7 +54,10 @@ public class PhotoService : IPhotoService
 
     public async Task<Photo> GetPhotoById(int photoId)
     {
-        return await _context.Photos.Where(x => x.Id == photoId).FirstOrDefaultAsync();
+        return await _context.Photos
+            .Include(x => x.AppUser)
+            .Where(x => x.Id == photoId)
+            .FirstOrDefaultAsync();
     }
 
     public async Task<IEnumerable<Photo>> GetUnapprovedPhotos()
