@@ -59,6 +59,8 @@ public class PhotoService : IPhotoService
 
     public async Task<IEnumerable<Photo>> GetUnapprovedPhotos()
     {
-        return await _context.Photos.Where(x => x.IsApproved == false).ToListAsync();
+        return await _context.Photos
+            .Include(x => x.AppUser)
+            .Where(x => x.IsApproved == false).ToListAsync();
     }
 }
