@@ -1,1 +1,23 @@
-<p>photo-management works!</p>
+<div class="row">
+  <table class="table">
+    <thead>
+    <tr>
+      <th style="width: 10%">Photo ID</th>
+      <th style="width: 30%">Username</th>
+      <th style="width: 30%">Photo</th>
+      <th style="width: 30%"></th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr *ngFor="let photo of unapprovedPhotos">
+      <td>{{photo.id}}</td>
+      <td>{{photo.userName | titlecase}}</td>
+      <td><img src="{{photo.url}}"></td>
+      <td>
+        <button class="btn btn-success me-1" (click)="approvePhoto(photo.id)">Approve</button>
+        <button class="btn btn-danger" (click)="deletePhoto(photo.id)">Delete</button>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+</div>
