@@ -103,4 +103,30 @@ public class AdminController : BaseApiController
 
         return BadRequest("Problem setting main photo.");
     }
+
+    [HttpDelete("delete-photo/{photoId}")]
+    public async Task<ActionResult> DeletePhoto(int photoId)
+    {
+        var photo = _photoService.GetPhotoById(photoId).Result;
+
+        if (photo == null) return NotFound();
+
+        if (photo.IsMain) return BadRequest("You cannot a user's main photo.");
+
+        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(photo.AppUserId);
+
+        if (user == null) return NotFound();
+
+        if (photo.PublicId != null)
+        {
+            var result = await _photoService.DeletePhotoAsync(photo.PublicId);
+            if (result.Error != null) return BadRequest(result.Error.Message);
+        }
+
+        user.Photos.Remove(photo);
+
+        if (await _unitOfWork.Complete()) return Ok();
+
+        return BadRequest("Problem deleting the photo.");
+    }
 }
