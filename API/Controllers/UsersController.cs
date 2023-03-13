@@ -109,6 +109,8 @@ public class UsersController : BaseApiController
 
         if (photo.IsMain) return BadRequest("This is already your main photo.");
 
+        if (!photo.IsApproved) return BadRequest("This photo has not been approved.");
+
         var currentMain = user.Photos.FirstOrDefault(x => x.IsMain);
 
         if (currentMain != null) currentMain.IsMain = false;
